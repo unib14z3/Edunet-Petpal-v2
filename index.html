@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Petpal — Dashboard</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --border: #e5e7eb;
+    --text: #1f2328;
+    --muted: #57606a;
+    --accent: #10a37f;
+    --accent-light: #e6f7f3;
+    --warn: #f59e0b;
+    --warn-light: #fef3c7;
+    --danger: #ef4444;
+    --danger-light: #fee2e2;
+    --blue: #3b82f6;
+    --blue-light: #eff6ff;
+    --sidebar-w: 220px;
+  }
+
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── Sidebar ── */
+  #sidebar {
+    width: var(--sidebar-w);
+    min-width: var(--sidebar-w);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 12px;
+    gap: 2px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 10px 20px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .brand-icon {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 13.5px;
+    color: var(--muted);
+    transition: background 0.15s, color 0.15s;
+    text-decoration: none;
+  }
+  .nav-item:hover { background: var(--bg); color: var(--text); }
+  .nav-item.active { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+
+  .nav-section {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    padding: 14px 10px 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .user-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 7px;
+  }
+  .user-avatar {
+    width: 30px; height: 30px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .user-name { font-size: 13px; font-weight: 500; }
+  .user-role { font-size: 11px; color: var(--muted); }
+
+  /* ── Main ── */
+  #main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  /* ── Topbar ── */
+  #topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .topbar-title h1 { font-size: 18px; font-weight: 700; }
+  .topbar-title p { font-size: 13px; color: var(--muted); }
+
+  .topbar-actions { display: flex; gap: 10px; align-items: center; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    transition: background 0.15s;
+  }
+  .btn:hover { background: var(--bg); }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .btn-primary:hover { background: #0d8f6e; }
+
+  /* ── Content ── */
+  #content {
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  /* ── Pet profile card ── */
+  .pet-profile {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+  }
+
+  .pet-avatar {
+    width: 88px; height: 88px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #fde68a, #f59e0b);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 44px;
+    flex-shrink: 0;
+    border: 3px solid var(--border);
+  }
+
+  .pet-info { flex: 1; }
+  .pet-name { font-size: 24px; font-weight: 700; margin-bottom: 2px; }
+  .pet-breed { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+
+  .pet-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag {
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .tag.green { background: var(--accent-light); color: var(--accent); border-color: #a7f3d0; }
+  .tag.yellow { background: var(--warn-light); color: #92400e; border-color: #fcd34d; }
+  .tag.blue { background: var(--blue-light); color: var(--blue); border-color: #bfdbfe; }
+
+  .pet-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 160px;
+  }
+  .stat-row { display: flex; justify-content: space-between; font-size: 13px; }
+  .stat-label { color: var(--muted); }
+  .stat-value { font-weight: 600; }
+
+  /* ── Grid ── */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .card-title .icon { font-size: 16px; }
+
+  .card-action {
+    font-size: 12px;
+    color: var(--accent);
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .card-action:hover { text-decoration: underline; }
+
+  /* ── Likes / Dislikes ── */
+  .pref-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .pref-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+  .pref-item.like { background: var(--accent-light); }
+  .pref-item.dislike { background: var(--danger-light); }
+  .pref-item .pref-icon { font-size: 16px; }
+  .pref-item .pref-text { flex: 1; font-weight: 500; }
+  .pref-item .pref-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-weight: 600;
+  }
+  .pref-item.like .pref-badge { background: #a7f3d0; color: #065f46; }
+  .pref-item.dislike .pref-badge { background: #fecaca; color: #991b1b; }
+
+  /* ── Events ── */
+  .event-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .event-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .event-date {
+    min-width: 44px;
+    text-align: center;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px 6px;
+    flex-shrink: 0;
+  }
+  .event-date .day { font-size: 18px; font-weight: 700; line-height: 1; }
+  .event-date .month { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .event-body { flex: 1; }
+  .event-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .event-meta { font-size: 12px; color: var(--muted); }
+
+  .event-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+  .event-dot.green { background: var(--accent); }
+  .event-dot.blue { background: var(--blue); }
+  .event-dot.yellow { background: var(--warn); }
+  .event-dot.red { background: var(--danger); }
+
+  /* ── Alerts ── */
+  .alert-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .alert-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 9px;
+    border: 1px solid transparent;
+  }
+  .alert-item.done { opacity: 0.45; }
+  .alert-item.medicine { background: var(--danger-light); border-color: #fecaca; }
+  .alert-item.play { background: var(--blue-light); border-color: #bfdbfe; }
+  .alert-item.food { background: var(--warn-light); border-color: #fcd34d; }
+  .alert-item.grooming { background: var(--accent-light); border-color: #a7f3d0; }
+  .alert-item.walk { background: #f5f3ff; border-color: #ddd6fe; }
+
+  .alert-icon { font-size: 20px; flex-shrink: 0; }
+  .alert-body { flex: 1; }
+  .alert-title { font-size: 13px; font-weight: 600; }
+  .alert-time { font-size: 12px; color: var(--muted); }
+
+  .alert-check {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    color: var(--accent);
+    transition: background 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+  }
+  .alert-check:hover { border-color: var(--accent); }
+  .alert-check.checked { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* ── Stat mini cards ── */
+  .mini-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .mini-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .mini-icon.green { background: var(--accent-light); }
+  .mini-icon.yellow { background: var(--warn-light); }
+  .mini-icon.blue { background: var(--blue-light); }
+  .mini-icon.red { background: var(--danger-light); }
+
+  .mini-body .mini-value { font-size: 20px; font-weight: 700; }
+  .mini-body .mini-label { font-size: 12px; color: var(--muted); }
+
+  /* ── Progress bar ── */
+  .progress-row { margin-bottom: 12px; }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 5px;
+  }
+  .progress-label span:last-child { font-weight: 600; }
+  .progress-bar {
+    height: 7px;
+    background: var(--bg);
+    border-radius: 99px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: var(--accent);
+    transition: width 0.4s;
+  }
+  .progress-fill.yellow { background: var(--warn); }
+  .progress-fill.blue { background: var(--blue); }
+  .progress-fill.red { background: var(--danger); }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div id="sidebar">
+  <div class="brand">
+    <div class="brand-icon">🐾</div>
+    Petpal
+  </div>
+
+  <a class="nav-item active" href="#">
+    <span class="icon">🏠</span> Dashboard
+  </a>
+  <a class="nav-item" href="#">
+    <span class="icon">📅</span> Events
+  </a>
+  <a class="nav-item" href="#">
+    <span class="icon">💊</span> Health
+  </a>
+  <a class="nav-item" href="#">
+    <span class="icon">🍖</span> Nutrition
+  </a>
+
+  <div class="nav-section">Records</div>
+  <a class="nav-item" href="#">
+    <span class="icon">📋</span> Medical History
+  </a>
+  <a class="nav-item" href="#">
+    <span class="icon">📷</span> Gallery
+  </a>
+  <a class="nav-item" href="#">
+    <span class="icon">⚙️</span> Settings
+  </a>
+
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="user-avatar">R</div>
+      <div>
+        <div class="user-name">Rishikesh</div>
+        <div class="user-role">Pet Owner</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main -->
+<div id="main">
+
+  <!-- Topbar -->
+  <div id="topbar">
+    <div class="topbar-title">
+      <h1>Dashboard</h1>
+      <p>Saturday, 12 July 2025</p>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn">+ Add Event</button>
+      <button class="btn btn-primary">+ Add Pet</button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div id="content">
+
+    <!-- Pet Profile -->
+    <div class="pet-profile">
+      <div class="pet-avatar">🐶</div>
+      <div class="pet-info">
+        <div class="pet-name">Bruno</div>
+        <div class="pet-breed">Golden Retriever · Male · 3 years old</div>
+        <div class="pet-tags">
+          <span class="tag green">Vaccinated</span>
+          <span class="tag yellow">Neutered</span>
+          <span class="tag blue">Microchipped</span>
+          <span class="tag">Playful</span>
+          <span class="tag">Friendly</span>
+        </div>
+      </div>
+      <div class="pet-stats">
+        <div class="stat-row"><span class="stat-label">Weight</span><span class="stat-value">28 kg</span></div>
+        <div class="stat-row"><span class="stat-label">Height</span><span class="stat-value">56 cm</span></div>
+        <div class="stat-row"><span class="stat-label">Vet</span><span class="stat-value">Dr. Sharma</span></div>
+        <div class="stat-row"><span class="stat-label">Last Checkup</span><span class="stat-value">2 Jun 2025</span></div>
+        <div class="stat-row"><span class="stat-label">Next Vaccine</span><span class="stat-value">20 Jul 2025</span></div>
+      </div>
+    </div>
+
+    <!-- Mini stat cards -->
+    <div class="grid-3">
+      <div class="mini-card">
+        <div class="mini-icon green">🏃</div>
+        <div class="mini-body">
+          <div class="mini-value">4.2 km</div>
+          <div class="mini-label">Today's Walk</div>
+        </div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-icon yellow">🍽️</div>
+        <div class="mini-body">
+          <div class="mini-value">2 / 3</div>
+          <div class="mini-label">Meals Today</div>
+        </div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-icon blue">💧</div>
+        <div class="mini-body">
+          <div class="mini-value">1.2 L</div>
+          <div class="mini-label">Water Intake</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Likes/Dislikes + Events -->
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">❤️</span> Likes &amp; Dislikes</div>
+          <span class="card-action">Edit</span>
+        </div>
+        <div class="pref-list">
+          <div class="pref-item like"><span class="pref-icon">🎾</span><span class="pref-text">Playing fetch</span><span class="pref-badge">Loves it</span></div>
+          <div class="pref-item like"><span class="pref-icon">🏊</span><span class="pref-text">Swimming</span><span class="pref-badge">Loves it</span></div>
+          <div class="pref-item like"><span class="pref-icon">🦴</span><span class="pref-text">Bone treats</span><span class="pref-badge">Favourite</span></div>
+          <div class="pref-item like"><span class="pref-icon">🚗</span><span class="pref-text">Car rides</span><span class="pref-badge">Enjoys</span></div>
+          <div class="pref-item dislike"><span class="pref-icon">⛈️</span><span class="pref-text">Thunderstorms</span><span class="pref-badge">Scared</span></div>
+          <div class="pref-item dislike"><span class="pref-icon">🛁</span><span class="pref-text">Baths</span><span class="pref-badge">Dislikes</span></div>
+          <div class="pref-item dislike"><span class="pref-icon">🐱</span><span class="pref-text">Cats (strangers)</span><span class="pref-badge">Avoids</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">📅</span> Upcoming Events</div>
+          <span class="card-action">View all</span>
+        </div>
+        <div class="event-list">
+          <div class="event-item">
+            <div class="event-date"><div class="day">14</div><div class="month">Jul</div></div>
+            <div class="event-body"><div class="event-title">Rabies Booster Vaccine</div><div class="event-meta">10:30 AM · Dr. Sharma, Pune Vet Clinic</div></div>
+            <div class="event-dot red"></div>
+          </div>
+          <div class="event-item">
+            <div class="event-date"><div class="day">18</div><div class="month">Jul</div></div>
+            <div class="event-body"><div class="event-title">Grooming Session</div><div class="event-meta">2:00 PM · Happy Paws Salon</div></div>
+            <div class="event-dot blue"></div>
+          </div>
+          <div class="event-item">
+            <div class="event-date"><div class="day">20</div><div class="month">Jul</div></div>
+            <div class="event-body"><div class="event-title">Annual Health Checkup</div><div class="event-meta">11:00 AM · Dr. Sharma, Pune Vet Clinic</div></div>
+            <div class="event-dot green"></div>
+          </div>
+          <div class="event-item">
+            <div class="event-date"><div class="day">26</div><div class="month">Jul</div></div>
+            <div class="event-body"><div class="event-title">Dog Park Meetup</div><div class="event-meta">6:00 PM · Koregaon Park</div></div>
+            <div class="event-dot yellow"></div>
+          </div>
+          <div class="event-item">
+            <div class="event-date"><div class="day">02</div><div class="month">Aug</div></div>
+            <div class="event-body"><div class="event-title">Flea &amp; Tick Treatment</div><div class="event-meta">Home · Apply Frontline Plus</div></div>
+            <div class="event-dot red"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Daily Alerts + Health Progress -->
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">🔔</span> Today's Alerts</div>
+          <span class="card-action">Manage</span>
+        </div>
+        <div class="alert-list">
+          <div class="alert-item medicine done">
+            <span class="alert-icon">💊</span>
+            <div class="alert-body"><div class="alert-title">Morning Medicine — Deworming</div><div class="alert-time">7:00 AM · Done</div></div>
+            <div class="alert-check checked" onclick="toggleCheck(this)">✓</div>
+          </div>
+          <div class="alert-item food done">
+            <span class="alert-icon">🍽️</span>
+            <div class="alert-body"><div class="alert-title">Breakfast — Royal Canin (200g)</div><div class="alert-time">8:00 AM · Done</div></div>
+            <div class="alert-check checked" onclick="toggleCheck(this)">✓</div>
+          </div>
+          <div class="alert-item walk">
+            <span class="alert-icon">🦮</span>
+            <div class="alert-body"><div class="alert-title">Morning Walk — 30 min</div><div class="alert-time">9:00 AM · Pending</div></div>
+            <div class="alert-check" onclick="toggleCheck(this)"></div>
+          </div>
+          <div class="alert-item play">
+            <span class="alert-icon">🎾</span>
+            <div class="alert-body"><div class="alert-title">Playtime — Fetch in garden</div><div class="alert-time">5:00 PM · Pending</div></div>
+            <div class="alert-check" onclick="toggleCheck(this)"></div>
+          </div>
+          <div class="alert-item food">
+            <span class="alert-icon">🍖</span>
+            <div class="alert-body"><div class="alert-title">Dinner — Royal Canin (200g)</div><div class="alert-time">7:00 PM · Pending</div></div>
+            <div class="alert-check" onclick="toggleCheck(this)"></div>
+          </div>
+          <div class="alert-item medicine">
+            <span class="alert-icon">💊</span>
+            <div class="alert-body"><div class="alert-title">Evening Medicine — Vitamin D</div><div class="alert-time">8:00 PM · Pending</div></div>
+            <div class="alert-check" onclick="toggleCheck(this)"></div>
+          </div>
+          <div class="alert-item grooming">
+            <span class="alert-icon">🪮</span>
+            <div class="alert-body"><div class="alert-title">Brush Coat — 10 min</div><div class="alert-time">9:00 PM · Pending</div></div>
+            <div class="alert-check" onclick="toggleCheck(this)"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">📊</span> Health Tracker</div>
+          <span class="card-action">Details</span>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label"><span>Daily Walk Goal</span><span>4.2 / 5 km</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:84%"></div></div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label"><span>Water Intake</span><span>1.2 / 2 L</span></div>
+          <div class="progress-bar"><div class="progress-fill blue" style="width:60%"></div></div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label"><span>Meals Completed</span><span>2 / 3</span></div>
+          <div class="progress-bar"><div class="progress-fill yellow" style="width:66%"></div></div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label"><span>Medications Given</span><span>1 / 2</span></div>
+          <div class="progress-bar"><div class="progress-fill red" style="width:50%"></div></div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-label"><span>Playtime</span><span>0 / 30 min</span></div>
+          <div class="progress-bar"><div class="progress-fill blue" style="width:0%"></div></div>
+        </div>
+        <div style="margin-top:20px;">
+          <div class="card-title" style="margin-bottom:12px;"><span class="icon">🏥</span> Vaccination Status</div>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;"><span>Rabies</span><span class="tag yellow">Due 14 Jul</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;"><span>Distemper (DHPP)</span><span class="tag green">Up to date</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;"><span>Leptospirosis</span><span class="tag green">Up to date</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;"><span>Bordetella</span><span class="tag green">Up to date</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;"><span>Flea &amp; Tick</span><span class="tag yellow">Due 2 Aug</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+  function toggleCheck(el) {
+    const item = el.closest('.alert-item');
+    if (el.classList.contains('checked')) {
+      el.classList.remove('checked');
+      el.textContent = '';
+      item.classList.remove('done');
+      item.querySelector('.alert-time').textContent =
+        item.querySelector('.alert-time').textContent.replace('Done', 'Pending');
+    } else {
+      el.classList.add('checked');
+      el.textContent = '✓';
+      item.classList.add('done');
+      item.querySelector('.alert-time').textContent =
+        item.querySelector('.alert-time').textContent.replace('Pending', 'Done');
+    }
+  }
+</script>
+
+<!-- WxO Chat Widget -->
+<div id="root"></div>
+<script>
+  window.wxOConfiguration = {
+    orchestrationID: "d1cee30fdaba4636a81249c33bf42485_3481db25-4377-440e-b1d9-bb6689f62c46",
+    hostURL: "https://eu-de.watson-orchestrate.cloud.ibm.com",
+    rootElementID: "root",
+    deploymentPlatform: "ibmcloud",
+    crn: "crn:v1:bluemix:public:watsonx-orchestrate:eu-de:a/d1cee30fdaba4636a81249c33bf42485:3481db25-4377-440e-b1d9-bb6689f62c46::",
+    chatOptions: {
+      agentId: "c1a1982c-efdd-49b7-be49-0996cb7fdeb7",
+    }
+  };
+  setTimeout(function () {
+    const script = document.createElement('script');
+    script.src = `${window.wxOConfiguration.hostURL}/wxochat/wxoLoader.js`;
+    script.addEventListener('load', function () {
+      wxoLoader.init();
+    });
+    document.head.appendChild(script);
+  }, 0);
+</script>
+
+</body>
+</html>
