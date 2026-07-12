@@ -421,6 +421,28 @@
   .progress-fill.yellow { background: var(--warn); }
   .progress-fill.blue { background: var(--blue); }
   .progress-fill.red { background: var(--danger); }
+
+  .page-view[hidden] { display: none; }
+  .page-intro { margin-bottom: 4px; color: var(--muted); }
+  .empty-state {
+    min-height: 260px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    color: var(--muted);
+  }
+  .empty-state .icon { display: block; font-size: 36px; margin-bottom: 8px; }
+
+  @media (max-width: 760px) {
+    body { display: block; }
+    #sidebar { width: 100%; min-width: 0; height: auto; position: static; flex-direction: row; flex-wrap: wrap; padding: 12px; }
+    .brand { padding: 4px 10px; margin-right: auto; }
+    .nav-section, .sidebar-footer { display: none; }
+    #topbar { padding: 14px 18px; }
+    #content { padding: 18px; }
+    .pet-profile, .grid-2, .grid-3 { grid-template-columns: 1fr; flex-direction: column; }
+    .pet-stats { width: 100%; }
+  }
 </style>
 </head>
 <body>
@@ -432,27 +454,27 @@
     Petpal
   </div>
 
-  <a class="nav-item active" href="#">
+  <a class="nav-item active" href="#dashboard" data-view="dashboard">
     <span class="icon">🏠</span> Dashboard
   </a>
-  <a class="nav-item" href="#">
+  <a class="nav-item" href="#events" data-view="events">
     <span class="icon">📅</span> Events
   </a>
-  <a class="nav-item" href="#">
+  <a class="nav-item" href="#health" data-view="health">
     <span class="icon">💊</span> Health
   </a>
-  <a class="nav-item" href="#">
+  <a class="nav-item" href="#nutrition" data-view="nutrition">
     <span class="icon">🍖</span> Nutrition
   </a>
 
   <div class="nav-section">Records</div>
-  <a class="nav-item" href="#">
+  <a class="nav-item" href="#medical-history" data-view="medical-history">
     <span class="icon">📋</span> Medical History
   </a>
-  <a class="nav-item" href="#">
+  <a class="nav-item" href="#gallery" data-view="gallery">
     <span class="icon">📷</span> Gallery
   </a>
-  <a class="nav-item" href="#">
+  <a class="nav-item" href="#settings" data-view="settings">
     <span class="icon">⚙️</span> Settings
   </a>
 
@@ -460,7 +482,6 @@
     <div class="user-chip">
       <div class="user-avatar">R</div>
       <div>
-        <div class="user-name">Rishikesh</div>
         <div class="user-role">Pet Owner</div>
       </div>
     </div>
@@ -476,14 +497,11 @@
       <h1>Dashboard</h1>
       <p>Saturday, 12 July 2025</p>
     </div>
-    <div class="topbar-actions">
-      <button class="btn">+ Add Event</button>
-      <button class="btn btn-primary">+ Add Pet</button>
-    </div>
   </div>
 
   <!-- Content -->
   <div id="content">
+    <div id="dashboard-view" class="page-view">
 
     <!-- Pet Profile -->
     <div class="pet-profile">
@@ -667,6 +685,9 @@
         </div>
       </div>
     </div>
+    </div><!-- /dashboard-view -->
+
+    <div id="secondary-view" class="page-view" hidden aria-live="polite"></div>
 
   </div><!-- /content -->
 </div><!-- /main -->
@@ -688,6 +709,74 @@
         item.querySelector('.alert-time').textContent.replace('Pending', 'Done');
     }
   }
+
+  const pageDetails = {
+    dashboard: { title: 'Dashboard', subtitle: 'Saturday, 12 July 2025' },
+    events: { title: 'Events', subtitle: 'Bruno\'s upcoming care schedule' },
+    health: { title: 'Health', subtitle: 'Track Bruno\'s daily health and vaccinations' },
+    nutrition: { title: 'Nutrition', subtitle: 'Today\'s food and hydration summary' },
+    'medical-history': { title: 'Medical History', subtitle: 'Bruno\'s care records' },
+    gallery: { title: 'Gallery', subtitle: 'Bruno\'s photo collection' },
+    settings: { title: 'Settings', subtitle: 'Manage dashboard preferences' }
+  };
+
+  const pageContent = {
+    events: `
+      <p class="page-intro">Keep track of appointments, treatments, and social plans.</p>
+      <div class="card"><div class="card-header"><div class="card-title"><span class="icon">📅</span> Upcoming Events</div></div>
+        <div class="event-list">
+          <div class="event-item"><div class="event-date"><div class="day">14</div><div class="month">Jul</div></div><div class="event-body"><div class="event-title">Rabies Booster Vaccine</div><div class="event-meta">10:30 AM · Dr. Sharma, Pune Vet Clinic</div></div><div class="event-dot red"></div></div>
+          <div class="event-item"><div class="event-date"><div class="day">18</div><div class="month">Jul</div></div><div class="event-body"><div class="event-title">Grooming Session</div><div class="event-meta">2:00 PM · Happy Paws Salon</div></div><div class="event-dot blue"></div></div>
+          <div class="event-item"><div class="event-date"><div class="day">20</div><div class="month">Jul</div></div><div class="event-body"><div class="event-title">Annual Health Checkup</div><div class="event-meta">11:00 AM · Dr. Sharma, Pune Vet Clinic</div></div><div class="event-dot green"></div></div>
+          <div class="event-item"><div class="event-date"><div class="day">26</div><div class="month">Jul</div></div><div class="event-body"><div class="event-title">Dog Park Meetup</div><div class="event-meta">6:00 PM · Koregaon Park</div></div><div class="event-dot yellow"></div></div>
+        </div>
+      </div>`,
+    health: `
+      <p class="page-intro">Daily goals and preventive care at a glance.</p>
+      <div class="grid-2"><div class="card"><div class="card-header"><div class="card-title"><span class="icon">📊</span> Daily Health Tracker</div></div>
+        <div class="progress-row"><div class="progress-label"><span>Daily Walk Goal</span><span>4.2 / 5 km</span></div><div class="progress-bar"><div class="progress-fill" style="width:84%"></div></div></div>
+        <div class="progress-row"><div class="progress-label"><span>Water Intake</span><span>1.2 / 2 L</span></div><div class="progress-bar"><div class="progress-fill blue" style="width:60%"></div></div></div>
+        <div class="progress-row"><div class="progress-label"><span>Medications Given</span><span>1 / 2</span></div><div class="progress-bar"><div class="progress-fill red" style="width:50%"></div></div></div>
+      </div><div class="card"><div class="card-header"><div class="card-title"><span class="icon">🏥</span> Vaccination Status</div></div>
+        <div class="pref-list"><div class="pref-item dislike"><span class="pref-text">Rabies</span><span class="pref-badge">Due 14 Jul</span></div><div class="pref-item like"><span class="pref-text">Distemper (DHPP)</span><span class="pref-badge">Up to date</span></div><div class="pref-item like"><span class="pref-text">Leptospirosis</span><span class="pref-badge">Up to date</span></div><div class="pref-item like"><span class="pref-text">Bordetella</span><span class="pref-badge">Up to date</span></div></div>
+      </div></div>`,
+    nutrition: `
+      <p class="page-intro">Bruno has completed two of three meals and logged 1.2 L of water today.</p>
+      <div class="grid-2"><div class="card"><div class="card-header"><div class="card-title"><span class="icon">🍽️</span> Meals Today</div></div>
+        <div class="alert-list"><div class="alert-item food done"><span class="alert-icon">🍽️</span><div class="alert-body"><div class="alert-title">Breakfast — Royal Canin (200g)</div><div class="alert-time">8:00 AM · Done</div></div></div><div class="alert-item food"><span class="alert-icon">🍖</span><div class="alert-body"><div class="alert-title">Dinner — Royal Canin (200g)</div><div class="alert-time">7:00 PM · Pending</div></div></div></div>
+      </div><div class="card"><div class="card-header"><div class="card-title"><span class="icon">💧</span> Hydration</div></div>
+        <div class="progress-row"><div class="progress-label"><span>Water Intake</span><span>1.2 / 2 L</span></div><div class="progress-bar"><div class="progress-fill blue" style="width:60%"></div></div></div>
+      </div></div>`,
+    'medical-history': `
+      <p class="page-intro">A summary of recent veterinary care and treatments.</p>
+      <div class="card"><div class="pref-list"><div class="pref-item like"><span class="pref-icon">🩺</span><span class="pref-text">Routine Checkup</span><span class="pref-badge">2 Jun 2025</span></div><div class="pref-item like"><span class="pref-icon">💉</span><span class="pref-text">DHPP Vaccination</span><span class="pref-badge">15 Apr 2025</span></div><div class="pref-item like"><span class="pref-icon">🪥</span><span class="pref-text">Dental Cleaning</span><span class="pref-badge">10 Jan 2025</span></div></div></div>`,
+    gallery: '<div class="card empty-state"><div><span class="icon">📷</span><strong>No photos yet</strong><br>Photos of Bruno will appear here.</div></div>',
+    settings: `
+      <p class="page-intro">Review the preferences used by this dashboard.</p>
+      <div class="card"><div class="pref-list"><div class="pref-item like"><span class="pref-icon">🐶</span><span class="pref-text">Active pet</span><span class="pref-badge">Bruno</span></div><div class="pref-item like"><span class="pref-icon">🔔</span><span class="pref-text">Daily care reminders</span><span class="pref-badge">Enabled</span></div><div class="pref-item like"><span class="pref-icon">📏</span><span class="pref-text">Measurement units</span><span class="pref-badge">Metric</span></div></div></div>`
+  };
+
+  const dashboardView = document.getElementById('dashboard-view');
+  const secondaryView = document.getElementById('secondary-view');
+  const title = document.querySelector('.topbar-title h1');
+  const subtitle = document.querySelector('.topbar-title p');
+  const navigation = document.querySelectorAll('.nav-item[data-view]');
+
+  function showPage(view) {
+    const selectedView = pageDetails[view] ? view : 'dashboard';
+    const details = pageDetails[selectedView];
+    title.textContent = details.title;
+    subtitle.textContent = details.subtitle;
+    dashboardView.hidden = selectedView !== 'dashboard';
+    secondaryView.hidden = selectedView === 'dashboard';
+    secondaryView.innerHTML = pageContent[selectedView] || '';
+    navigation.forEach((item) => item.classList.toggle('active', item.dataset.view === selectedView));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  navigation.forEach((item) => item.addEventListener('click', () => showPage(item.dataset.view)));
+  window.addEventListener('hashchange', () => showPage(window.location.hash.slice(1)));
+  showPage(window.location.hash.slice(1) || 'dashboard');
 </script>
 
 <!-- WxO Chat Widget -->

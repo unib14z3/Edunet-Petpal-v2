@@ -1,5 +1,5 @@
 # Petpal
-Database will not work upon hosting because it was setup using ngrok tunnel and is unique to every localhost 
+Database will not work upon hosting because it was setup using ngrok tunnel and is unique to every localhost and connection set up in Orchestrate is different 
 
 Petpal is a prototype pet-care dashboard with a lightweight knowledge API. The dashboard presents a pet's daily care information, while the API stores and searches pet-care knowledge records in SQLite.
 
